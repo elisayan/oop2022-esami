@@ -24,11 +24,32 @@ public class LogicsImpl implements Logics {
     @Override
     public boolean rookMove(int x, int y) {
         var position = new Pair<>(x, y);
-        if (attack(position, players.get(Player.ROOK))) {
+        var rookPosition = players.get(Player.ROOK);
+        var kingPosition = players.get(Player.KING);
+
+        if (attack(position, rookPosition)) {
+
+            if (sameLine(x, kingPosition.getX()) && sameLine(x, rookPosition.getX())
+                    && inBetween(y, kingPosition.getY(), rookPosition.getY())) {
+                return false;
+            }
+
+            if (sameLine(y, kingPosition.getY()) && sameLine(y, rookPosition.getY())
+                    && inBetween(x, kingPosition.getX(), rookPosition.getX())) {
+                return false;
+            }
             players.put(Player.ROOK, position);
             return true;
         }
         return false;
+    }
+
+    private boolean sameLine(int p1, int p2){
+        return p1 == p2;
+    }
+
+    private boolean inBetween(int y, int yK, int yR){
+        return y < yR ? y < yK && yK < yR : y > yK && yR < yK;
     }
 
     private boolean attack(Pair<Integer, Integer> p1, Pair<Integer, Integer> p2) {
@@ -41,13 +62,14 @@ public class LogicsImpl implements Logics {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 Pair<Integer, Integer> actual = new Pair<Integer, Integer>(i, j);
-                if (Math.abs(i - king.getX()) <= 1 && Math.abs(j - king.getY()) <= 1) {
+                if (Math.abs(i - king.getX()) <= 1 && Math.abs(j - king.getY()) <= 1
+                        && !(i == king.getX() && j == king.getY())) {
                     attackedList.add(actual);
                 }
             }
         }
         return attackedList;
-    }
+    }    
 
     @Override
     public void kingMove() {
@@ -58,7 +80,7 @@ public class LogicsImpl implements Logics {
         } else {
             players.put(Player.KING, valid.get(random.nextInt(valid.size())));
         }
-    }
+    }    
 
     @Override
     public void reset() {

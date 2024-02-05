@@ -2,51 +2,55 @@ package a01b.e2;
 
 import java.util.*;
 
-public class LogicsImpl implements Logics{
+public class LogicsImpl implements Logics {
 
-    private List<Pair<Integer,Integer>> selected = new LinkedList<>();
-    private List<Pair<Integer, Integer>> asterisch = new LinkedList<>();
+    private Set<Pair<Integer, Integer>> enabled = new HashSet<>();
+    private final int size;
+    private boolean over = false;
 
-    @Override
-    public boolean hit(int x, int y) {
-        setAsterisch(x, y);
+    public LogicsImpl(int size) {
+        this.size = size;
+    }
 
-        if (selected.containsAll(asterisch)) {
-            selected.removeAll(asterisch);
+    private boolean toggle(int x, int y) {
+        var pair = new Pair<>(x, y);
+        if (enabled.contains(pair)) {
+            enabled.remove(pair);
             return false;
         }
-
-        selected.addAll(asterisch);
+        enabled.add(pair);
         return true;
     }
 
-    private void setAsterisch(int x, int y){
-        asterisch.clear();
-        asterisch.add(new Pair<Integer,Integer>(x-1, y-1));
-        asterisch.add(new Pair<Integer,Integer>(x+1, y-1));
-        asterisch.add(new Pair<Integer,Integer>(x-1, y+1));
-        asterisch.add(new Pair<Integer,Integer>(x+1, y+1));
+    @Override
+    public void hit(int x, int y) {
+        Map<Boolean, List<Boolean>> toggles = new HashMap<>();
+
+        for (int i = x - 1; i <= x + 1; i++) {
+            for (int j = y - 1; j <= y + 1; j++) {
+                if (Math.abs(x - i) == 1 && Math.abs(y - j) == 1 &&
+                        !(i == x && j == y)) {
+                    boolean result = toggle(i, j);
+                    List<Boolean> list = toggles.get(result);
+                    if (list == null) {
+                        list = new ArrayList<>();
+                        toggles.put(result, list);
+                    }
+                    list.add(result);
+                }
+            }
+        }
+
+        over = toggles.size() == 2 && toggles.get(true).size() == 1 && toggles.get(false).size() == 3;
+    }
+
+    @Override
+    public boolean isEnabled(int x, int y) {
+        return enabled.contains(new Pair<>(x, y));
     }
 
     @Override
     public boolean isOver() {
-        List<Pair<Integer,Integer>> subList = asterisch;
-
-        for (int i = 0; i < asterisch.size(); i++) {
-            subList.remove(i);
-
-            // if (selected.containsAll(subList)) {
-            //     return true;
-            // }
-        }
-
-
-        return false;
+        return over;
     }
-
-    @Override
-    public boolean isAsterisch(int x, int y) {
-        return selected.contains(new Pair<>(x,y));
-    }
-    
 }

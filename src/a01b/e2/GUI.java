@@ -14,7 +14,7 @@ public class GUI extends JFrame {
     public GUI(int size) {
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setSize(100*size, 100*size);
-        this.logics = new LogicsImpl();
+        this.logics = new LogicsImpl(size);
         
         JPanel panel = new JPanel(new GridLayout(size,size));
         this.getContentPane().add(panel);
@@ -24,11 +24,10 @@ public class GUI extends JFrame {
         	    var button = (JButton)e.getSource();
         	    var position = cells.get(button);
 
-                if (logics.hit(position.getX(), position.getY())) {
-                    for (var entry : cells.entrySet()) {
-                        entry.getKey().setText(
-                                logics.isAsterisch(entry.getValue().getX(), entry.getValue().getY()) ? "*" : "");
-                    }
+                logics.hit(position.getX(), position.getY());
+                for (var entry : cells.entrySet()) {
+                    entry.getKey().setText(
+                            logics.isEnabled(entry.getValue().getX(), entry.getValue().getY()) ? "*" : "");
                 }
 
                 if (logics.isOver()) {
